@@ -16,7 +16,7 @@ class ApposeProgressBarCallback(ProgressBar):
         pl_module: LightningModule,
     ):
         super().on_sanity_check_start(trainer, pl_module)
-        self.task.update("Data Sanity Check...")
+        self.task.update("Data Sanity Checking...")
 
     def on_fit_start(self, trainer: Trainer, pl_module: LightningModule):
         super().on_fit_start(trainer, pl_module)
@@ -31,7 +31,7 @@ class ApposeProgressBarCallback(ProgressBar):
         super().on_train_batch_start(trainer, pl_module, batch, batch_idx)
         self.task.update(
             f"Training: Epoch {trainer.current_epoch + 1}/{trainer.max_epochs}",
-            current=batch_idx,
+            current=batch_idx + 1,
             maximum=int(self.total_train_batches),
         )
 
@@ -47,7 +47,7 @@ class ApposeProgressBarCallback(ProgressBar):
             trainer, pl_module, batch, batch_idx, dataloader_idx
         )
         self.task.update(
-            "Validation:", current=batch_idx, maximum=int(self.total_val_batches)
+            "Validation:", current=batch_idx + 1, maximum=int(self.total_val_batches)
         )
 
     def on_fit_end(
@@ -73,7 +73,7 @@ class ApposeProgressBarCallback(ProgressBar):
         )
         self.task.update(
             "Predicting:",
-            current=batch_idx,
+            current=batch_idx + 1,
             maximum=int(trainer.num_predict_batches[0]),
         )
 
