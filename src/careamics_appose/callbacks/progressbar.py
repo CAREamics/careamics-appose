@@ -74,7 +74,7 @@ class ApposeProgressBarCallback(ProgressBar):
         self.task.update(
             "Predicting:",
             current=batch_idx,
-            maximum=int(self.total_predict_batches_current_dataloader),
+            maximum=int(trainer.num_predict_batches[0]),
         )
 
     def on_predict_end(
@@ -83,7 +83,7 @@ class ApposeProgressBarCallback(ProgressBar):
         pl_module: LightningModule,
     ):
         super().on_predict_end(trainer, pl_module)
-        _total = self.total_predict_batches_current_dataloader
+        _total = trainer.num_predict_batches[0]
         self.task.update(
             "Predicting: Done!",
             current=int(_total),
