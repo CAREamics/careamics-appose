@@ -1,4 +1,5 @@
 uv.lock
+.vscode
 .DS_Store
 
 # Byte-compiled / optimized / DLL files

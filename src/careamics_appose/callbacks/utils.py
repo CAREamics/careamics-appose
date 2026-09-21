@@ -5,7 +5,7 @@ from careamics.lightning.callbacks import ProgressBarCallback
 from .progressbar import ApposeProgressBarCallback
 
 
-def update_callbacks(careamist: CAREamist, task: Task) -> None:
+def update_careamist_callbacks(careamist: CAREamist, task: Task) -> None:
     """Update the callbacks of the CAREamist instance
     to use the ApposeProgressBarCallback.
 
