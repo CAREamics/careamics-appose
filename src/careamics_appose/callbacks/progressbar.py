@@ -5,6 +5,7 @@ from appose.python_worker import Task
 from careamics.lightning.callbacks import PredictionStoppedException
 from lightning.pytorch import LightningModule, Trainer
 from lightning.pytorch.callbacks import ProgressBar
+from lightning.pytorch.trainer import call
 
 
 class ApposeProgressBarCallback(ProgressBar):
@@ -19,6 +20,8 @@ class ApposeProgressBarCallback(ProgressBar):
                 # Stop the training loop
                 trainer.should_stop = True
                 trainer.limit_val_batches = 0  # skip validation
+                trainer._teardown()
+                call._call_teardown_hook(trainer)
             else:
                 return function(self, trainer, *args, **kwargs)
 
