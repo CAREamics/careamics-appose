@@ -19,8 +19,8 @@ class ApposeProgressBarCallback(ProgressBar):
                 # Stop the training loop
                 trainer.should_stop = True
                 trainer.limit_val_batches = 0  # skip validation
-
-            return function(self, trainer, *args, **kwargs)
+            else:
+                return function(self, trainer, *args, **kwargs)
 
         return wrap
 
@@ -76,6 +76,7 @@ class ApposeProgressBarCallback(ProgressBar):
         super().on_fit_end(trainer, pl_module)
         self.task.update("Training: Done!")
 
+    @_check_task_cancellation
     def on_predict_batch_start(
         self,
         trainer: Trainer,
@@ -84,11 +85,6 @@ class ApposeProgressBarCallback(ProgressBar):
         batch_idx: int,
         dataloader_idx: int = 0,
     ):
-        if self.task.cancel_requested:
-            self.task.update("Cancellation requested. Stopping...")
-            trainer.should_stop = True
-            raise PredictionStoppedException()
-
         super().on_predict_batch_start(
             trainer, pl_module, batch, batch_idx, dataloader_idx
         )
