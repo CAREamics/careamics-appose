@@ -13,21 +13,24 @@ class ApposeProgressBarCallback(ProgressBar):
         super().__init__()
         self.task = task
 
-    def _check_task_cancellation(function: Callable[[Self, Trainer, Any], Any]):
-        def wrap(self, trainer: Trainer, *args, **kwargs):
+    def _check_task_cancellation(
+        function: Callable[[Self, Trainer, LightningModule], Any],
+        stage: str,
+    ):
+        def wrap(self, trainer: Trainer, pl_module: LightningModule, *args, **kwargs):
             if self.task.cancel_requested:
                 self.task.update("Cancellation requested. Stopping...")
                 # Stop the training loop
                 trainer.should_stop = True
                 trainer.limit_val_batches = 0  # skip validation
                 trainer._teardown()
-                call._call_teardown_hook(trainer)
+                pl_module.teardown(stage)
             else:
-                return function(self, trainer, *args, **kwargs)
+                return function(self, trainer, pl_module, *args, **kwargs)
 
         return wrap
 
-    @_check_task_cancellation
+    @_check_task_cancellation(stage="fit")
     def on_sanity_check_start(
         self,
         trainer: Trainer,
@@ -36,11 +39,11 @@ class ApposeProgressBarCallback(ProgressBar):
         super().on_sanity_check_start(trainer, pl_module)
         self.task.update("Data Sanity Checking...")
 
-    @_check_task_cancellation
+    @_check_task_cancellation(stage="fit")
     def on_fit_start(self, trainer: Trainer, pl_module: LightningModule):
         super().on_fit_start(trainer, pl_module)
 
-    @_check_task_cancellation
+    @_check_task_cancellation(stage="fit")
     def on_train_batch_start(
         self,
         trainer: Trainer,
@@ -55,7 +58,7 @@ class ApposeProgressBarCallback(ProgressBar):
             maximum=int(self.total_train_batches),
         )
 
-    @_check_task_cancellation
+    @_check_task_cancellation(stage="validate")
     def on_validation_batch_start(
         self,
         trainer: Trainer,
@@ -79,7 +82,7 @@ class ApposeProgressBarCallback(ProgressBar):
         super().on_fit_end(trainer, pl_module)
         self.task.update("Training: Done!")
 
-    @_check_task_cancellation
+    @_check_task_cancellation(stage="predict")
     def on_predict_batch_start(
         self,
         trainer: Trainer,
