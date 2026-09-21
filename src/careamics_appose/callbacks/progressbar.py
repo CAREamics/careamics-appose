@@ -30,8 +30,8 @@ class ApposeProgressBarCallback(ProgressBar):
                     # Stop the training loop
                     trainer.should_stop = True
                     trainer.limit_val_batches = 0  # skip validation
-                    trainer._teardown()
                     pl_module.teardown(stage)
+                    # trainer._teardown()
                     return None
                 else:
                     return function(self, trainer, pl_module, *args, **kwargs)
