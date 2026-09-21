@@ -13,22 +13,32 @@ class ApposeProgressBarCallback(ProgressBar):
         super().__init__()
         self.task = task
 
+    @staticmethod
     def _check_task_cancellation(
-        function: Callable[[Self, Trainer, LightningModule], Any],
         stage: str,
     ):
-        def wrap(self, trainer: Trainer, pl_module: LightningModule, *args, **kwargs):
-            if self.task.cancel_requested:
-                self.task.update("Cancellation requested. Stopping...")
-                # Stop the training loop
-                trainer.should_stop = True
-                trainer.limit_val_batches = 0  # skip validation
-                trainer._teardown()
-                pl_module.teardown(stage)
-            else:
-                return function(self, trainer, pl_module, *args, **kwargs)
+        def decorator(function: Callable):
+            def wrap(
+                self: Self,
+                trainer: Trainer,
+                pl_module: LightningModule,
+                *args,
+                **kwargs,
+            ):
+                if self.task.cancel_requested:
+                    self.task.update("Cancellation requested. Stopping...")
+                    # Stop the training loop
+                    trainer.should_stop = True
+                    trainer.limit_val_batches = 0  # skip validation
+                    trainer._teardown()
+                    pl_module.teardown(stage)
+                    return None
+                else:
+                    return function(self, trainer, pl_module, *args, **kwargs)
 
-        return wrap
+            return wrap
+
+        return decorator
 
     @_check_task_cancellation(stage="fit")
     def on_sanity_check_start(
