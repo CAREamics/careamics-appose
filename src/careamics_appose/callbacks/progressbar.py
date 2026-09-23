@@ -90,7 +90,11 @@ class ApposeProgressBarCallback(ProgressBar):
         pl_module: LightningModule,
     ):
         super().on_fit_end(trainer, pl_module)
-        self.task.update("Training: Done!")
+        self.task.update(
+            "Training: Done!",
+            current=int(trainer.num_training_batches),
+            maximum=int(trainer.num_training_batches),
+        )
 
     @_check_task_cancellation(stage="predict")
     def on_predict_batch_start(
