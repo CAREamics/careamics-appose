@@ -15,7 +15,3 @@ class TaskTQDM(tqdm.tqdm):
         super().close(*args, **kwargs)
         if self.task is not None:
             self.task.update(self.desc, current=self.n, maximum=self.total)
-
-
-# monkey patch tqdm to use TaskTQDM
-tqdm.tqdm = TaskTQDM
